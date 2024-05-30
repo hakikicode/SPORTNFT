@@ -5,9 +5,8 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import "./SportNft.sol"; // Ensure the path is correct relative to this file
+import "./SportNft.sol";
 
 error EXPIRED();
 error NotOwner();
@@ -22,20 +21,24 @@ error InsufficientBalance();
 contract SportVault is Ownable, ReentrancyGuard {
 
     using Strings for uint256;
+
     address public ERCtoken;
-    address public SoccerNft;
-    mapping(uint256 => Listing) public listings;
-    mapping(uint256 => Bid) private _bids;
+    address public SportNftAddress;
+    AggregatorV3Interface internal priceFeed;
+
     uint256 public listingId;
     uint256 public totalListings;
     uint256 public listPrice;
     address public contractOwner;
     uint256 public listingPrice;
-    AggregatorV3Interface internal priceFeed;
+
+    mapping(uint256 => Listing) public listings;
+    mapping(uint256 => Bid[]) public bids;
 
     struct Listing {
         uint256 tokenId;
         address tokenAddress;
+        string tokenURI;
         uint256 price;
         uint88 deadline;
         address lister;
@@ -43,46 +46,42 @@ contract SportVault is Ownable, ReentrancyGuard {
     }
 
     struct Bid {
-        uint256 tokenId;
-        uint256 price;
-        uint88 deadline;
-        address lister;
-        bool active;
-        uint256 highestBid;
-        uint256 bidBalance;
-        address highestBidder;
+        address bidder;
+        uint256 amount;
+        uint88 timestamp;
     }
-
-    Bid[] public bids;
-    mapping(uint256 => Bid) public Createdbids;
 
     event ListingCreated(uint256 indexed listingId, Listing listing);
     event ListingExecuted(uint256 indexed listingId, Listing listing);
     event ListingEdited(uint256 indexed listingId, Listing listing);
-    event BidPlaced(address indexed bidder, uint256 indexed tokenId, uint256 amount);
-    event BidWithdrawn(address indexed bidder, uint256 indexed tokenId, uint256 amount);
-    event BidExecuted(uint256 indexed bidId, address indexed winner, uint256 indexed highestBid);
+    event BidPlaced(address indexed bidder, uint256 indexed listingId, uint256 amount);
+    event BidWithdrawn(address indexed bidder, uint256 indexed listingId, uint256 amount);
+    event BidExecuted(uint256 indexed listingId, address indexed winner, uint256 amount);
+    event NFTBought(uint256 indexed listingId, address indexed buyer, uint256 amount);
 
-    constructor(address _token, address _soccerNft, address _priceFeed) Ownable(msg.sender) {
+    constructor(address _token, address _sportNftAddress, address _priceFeed) Ownable(msg.sender) {
         ERCtoken = _token;
-        SoccerNft = _soccerNft;
+        SportNftAddress = _sportNftAddress;
         contractOwner = msg.sender;
         priceFeed = AggregatorV3Interface(_priceFeed);
     }
 
-    function createListing(address _tokenAddress, uint256 _tokenId, uint256 _price, uint256 _deadline) external nonReentrant {
+    function createListing(string memory _tokenURI, uint256 _price, uint256 _deadline) external nonReentrant {
         require(_price >= 100 * 1**18, "MinPriceTooLow");
         require(_deadline >= 80, "DurationTooShort");
 
-        // Transfer the NFT to the contract
+        SportNft sportNft = SportNft(SportNftAddress);
+        uint256 tokenId = sportNft.mintNFT(address(this), _tokenURI);
+
         uint88 deadline = uint88(block.timestamp) + uint88(_deadline);
         listingId++;
         listings[listingId] = Listing({
-            tokenId: _tokenId,
+            tokenId: tokenId,
+            tokenAddress: SportNftAddress,
+            tokenURI: _tokenURI,
             price: _price,
             deadline: deadline,
             lister: msg.sender,
-            tokenAddress: _tokenAddress,
             active: true
         });
         totalListings++;
@@ -91,17 +90,15 @@ contract SportVault is Ownable, ReentrancyGuard {
     }
 
     function executeListing(uint256 _listingId) external nonReentrant {
-        require(_listingId > 0 && _listingId <= listingId, "Listing ID does not exist");
         Listing storage listing = listings[_listingId];
-        require(listing.lister != address(0), "Listing not existent");
-        require(listing.active, "Listing not active");
+        require(listing.active, "NotActive");
         require(block.timestamp <= listing.deadline, "Listing expired");
+        require(msg.sender == listing.lister, "NotOwner");
 
-        // Verify the caller is the lister
-        verifyOwner(listing.lister);
-
-        // Update state
         listing.active = false;
+
+        SportNft sportNft = SportNft(SportNftAddress);
+        sportNft.safeTransferFrom(address(this), msg.sender, listing.tokenId);
 
         emit ListingExecuted(_listingId, listing);
     }
@@ -111,172 +108,78 @@ contract SportVault is Ownable, ReentrancyGuard {
         Listing storage listing = listings[_listingId];
         require(listing.lister != address(0), "ListingNotExistent");
 
-        Bid storage bid = Createdbids[_listingId];
-        bid.lister = listing.lister;
-        bid.tokenId = _listingId;
-        bid.price = listing.price;
-        bid.active = true;
-        bid.deadline = uint88(block.timestamp) + 80;
+        Bid memory newBid = Bid({
+            bidder: msg.sender,
+            amount: 0,
+            timestamp: uint88(block.timestamp)
+        });
 
-        bids.push(bid);
+        bids[_listingId].push(newBid);
     }
 
-    function placeBid(uint256 tokenId, uint256 price) external {
-        Bid storage bid = Createdbids[tokenId];
-        require(price > bid.highestBid, "Less than highestBid");
+    function placeBid(uint256 _listingId, uint256 _amount) external nonReentrant {
+        Listing storage listing = listings[_listingId];
+        require(listing.active, "Listing is not active");
+        require(block.timestamp <= listing.deadline, "Listing expired");
 
-        bid.highestBid = price;
-        bid.highestBidder = msg.sender;
+        bids[_listingId].push(Bid({
+            bidder: msg.sender,
+            amount: _amount,
+            timestamp: uint88(block.timestamp)
+        }));
 
-        emit BidPlaced(msg.sender, tokenId, price);
+        emit BidPlaced(msg.sender, _listingId, _amount);
     }
 
-    function getHighestBidder(uint256 bidId) external view returns (address) {
-        Bid memory bid = Createdbids[bidId];
-        return bid.highestBidder;
+    function getBidHistory(uint256 _listingId) external view returns (Bid[] memory) {
+        return bids[_listingId];
     }
 
-    function executeBid(uint256 bidId) external nonReentrant {
-        Bid storage bid = Createdbids[bidId];
-        //require(bid.active, "Bid is not active");
-        uint256 highestBid = bid.highestBid;
-        address winner = bid.highestBidder;
+    function executeBid(uint256 _listingId) external nonReentrant {
+        Listing storage listing = listings[_listingId];
+        require(listing.active, "Listing is not active");
+        require(block.timestamp <= listing.deadline, "Listing expired");
 
-        bid.active = false;
+        Bid[] storage bidList = bids[_listingId];
+        require(bidList.length > 0, "No bids found");
 
-        // Transfer the highest bid amount from the winner to the contract
-        bool success = IERC20(ERCtoken).transferFrom(winner, address(this), highestBid);
+        Bid storage highestBid = bidList[0];
+        for (uint256 i = 1; i < bidList.length; i++) {
+            if (bidList[i].amount > highestBid.amount) {
+                highestBid = bidList[i];
+            }
+        }
+
+        listing.active = false;
+
+        bool success = IERC20(ERCtoken).transferFrom(highestBid.bidder, listing.lister, highestBid.amount);
         require(success, "Transfer failed");
 
-        uint256 fee = (highestBid * 10) / 100;
-        uint256 balance = highestBid - fee;
-        bid.bidBalance = balance;
+        SportNft sportNft = SportNft(SportNftAddress);
+        sportNft.safeTransferFrom(address(this), highestBid.bidder, listing.tokenId);
 
-        // Ensure the contract has approval to transfer the NFT
-        IERC721 token = IERC721(SoccerNft);
-
-        // Transfer the NFT to the highest bidder
-        token.safeTransferFrom(bid.lister, winner, bid.tokenId);
-
-        emit BidExecuted(bidId, winner, highestBid);
+        emit BidExecuted(_listingId, highestBid.bidder, highestBid.amount);
     }
 
-    function withdrawFunds(uint256 amount, uint256 bidId) external nonReentrant {
-        Bid storage bid = Createdbids[bidId];
-        require(msg.sender == bid.lister, "Not your bid");
-        require(bid.bidBalance >= amount, "Insufficient Balance");
+    function buyNFT(uint256 _listingId) external nonReentrant {
+        Listing storage listing = listings[_listingId];
+        require(listing.active, "Listing is not active");
+        require(block.timestamp <= listing.deadline, "Listing expired");
 
-        // Update balance before transfer
-        bid.bidBalance -= amount;
+        listing.active = false;
 
-        IERC20(ERCtoken).transfer(bid.lister, amount);
+        bool success = IERC20(ERCtoken).transferFrom(msg.sender, listing.lister, listing.price);
+        require(success, "Transfer failed");
+
+        SportNft sportNft = SportNft(SportNftAddress);
+        sportNft.safeTransferFrom(address(this), msg.sender, listing.tokenId);
+
+        emit NFTBought(_listingId, msg.sender, listing.price);
     }
 
-    // Function to fetch item from IPFS based on CID
-    function fetchIPFSItem(string memory cid) public pure returns (string memory) {
-        return string(abi.encodePacked("https://ipfs.io/ipfs/", cid));
-    }
-
-    // Mint and list NFT with real-life asset metadata
-    function mintAndListNFT(address recipient, string memory tokenURI, uint256 price, uint256 deadline) external onlyOwner {
-        SportNft sportNft = SportNft(SoccerNft);
-        uint256 tokenId = sportNft.mintNFT(tokenURI, recipient);
-
-        createListing(SoccerNft, tokenId, price, deadline);
-    }
-
-    // Additional helper functions
-
-    function updateListPrice(uint256 _listPrice) public payable {
-        require(contractOwner == msg.sender, "Only owner can update listing price");
-        listPrice = _listPrice;
-    }
-
-    function getListingPrice() public view returns (uint256) {
-        return listingPrice;
-    }
-
-    function getAllNFTs() external view returns (Listing[] memory) {
-        uint256 activeCount = 0;
-        for (uint256 i = 1; i <= listingId; i++) {
-            if (listings[i].active) {
-                activeCount++;
-            }
-        }
-
-        Listing[] memory activeListings = new Listing[](activeCount);
-        uint256 currentIndex = 0;
-
-        for (uint256 i = 1; i <= listingId; i++) {
-            if (listings[i].active) {
-                activeListings[currentIndex] = listings[i];
-                currentIndex++;
-            }
-        }
-        return activeListings;
-    }
-
-    function getMyNFTs() public view returns (Listing[] memory) {
-        uint256 totalItemCount = listingId;
-        uint256 itemCount = 0;
-        uint256 currentIndex = 0;
-
-        for (uint256 i = 1; i <= totalItemCount; i++) {
-            if (listings[i].lister == msg.sender || IERC721(listings[i].tokenAddress).ownerOf(listings[i].tokenId) == msg.sender) {
-                itemCount++;
-            }
-        }
-
-        Listing[] memory items = new Listing[](itemCount);
-        for (uint256 i = 1; i <= totalItemCount; i++) {
-            if (listings[i].lister == msg.sender || IERC721(listings[i].tokenAddress).ownerOf(listings[i].tokenId) == msg.sender) {
-                uint256 currentId = i;
-                Listing storage currentItem = listings[currentId];
-                items[currentIndex] = currentItem;
-                currentIndex++;
-            }
-        }
-        return items;
-    }
-
-    function getAllListings() external view returns (Listing[] memory) {
-        Listing[] memory activeListings = new Listing[](totalListings);
-        uint256 count = 0;
-        for (uint256 i = 1; i <= listingId; i++) {
-            if (listings[i].active) {
-                activeListings[count] = listings[i];
-                count++;
-            }
-        }
-        assembly {mstore(activeListings, count)}
-        return activeListings;
-    }
-
-    function getListingsByAddress(address owner) external view returns (Listing[] memory) {
-        uint256 count = 0;
-        for (uint256 i = 1; i <= listingId; i++) {
-            if (listings[i].lister == owner) {
-                count++;
-            }
-        }
-
-        Listing[] memory userList = new Listing[](count);
-        uint256 currentIndex = 0;
-        for (uint256 i = 1; i <= listingId; i++) {
-            if (listings[i].lister == owner) {
-                userList[currentIndex] = listings[i];
-                currentIndex++;
-            }
-        }
-        return userList;
-    }
-
-    function getBid(uint256 bidId) external view returns (Bid memory) {
-        return Createdbids[bidId];
-    }
-
-    function getAllBids() external view returns (Bid[] memory) {
-        return bids;
+    function getTokenURI(uint256 _listingId) external view returns (string memory) {
+        Listing storage listing = listings[_listingId];
+        return listing.tokenURI;
     }
 
     function getLatestPrice() public view returns (int) {
@@ -288,18 +191,5 @@ contract SportVault is Ownable, ReentrancyGuard {
             /* uint80 answeredInRound */
         ) = priceFeed.latestRoundData();
         return price;
-    }
-
-    function verifyOwner(address owner) internal view {
-        require(msg.sender == owner, "NotOwner");
-    }
-
-    function verifyActiveListing(uint256 _listingId) internal view {
-        Listing storage listing = listings[_listingId];
-        require(listing.active, "NotActive");
-    }
-
-    function verifyBid(uint256 _bidId) internal view {
-        require(_bidId > 0 && _bidId <= bids.length, "BidNotExist");
     }
 }
