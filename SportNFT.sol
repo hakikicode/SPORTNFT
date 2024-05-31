@@ -10,11 +10,11 @@ contract SportNft is ERC721URIStorage {
 
     constructor() ERC721("SportNFT", "SNFT") {}
 
-    function mintNFT(string memory tokenURI, address mintnft) external returns (uint256) {
+    function mintNFT(address recipient, string memory tokenURI) external returns (uint256) {
         _tokenIds++;
         uint256 newItemId = _tokenIds;
 
-        _mint(mintnft, newItemId);
+        _mint(recipient, newItemId);
         _setTokenURI(newItemId, tokenURI);
         return newItemId;
     }

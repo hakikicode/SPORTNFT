@@ -5,8 +5,9 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import "./SportNft.sol";
+import "SportNFT.sol"; // Ensure this path is correct according to your project structure
 
 error EXPIRED();
 error NotOwner();
@@ -155,7 +156,7 @@ contract SportVault is Ownable, ReentrancyGuard {
         bool success = IERC20(ERCtoken).transferFrom(highestBid.bidder, listing.lister, highestBid.amount);
         require(success, "Transfer failed");
 
-        SportNft sportNft = SportNft(SportNftAddress);
+        SportNft sportNft = SportNft(SportNft(SportNftAddress));
         sportNft.safeTransferFrom(address(this), highestBid.bidder, listing.tokenId);
 
         emit BidExecuted(_listingId, highestBid.bidder, highestBid.amount);

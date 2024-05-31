@@ -303,14 +303,14 @@
 			{
 				"inputs": [
 					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
 						"internalType": "string",
 						"name": "tokenURI",
 						"type": "string"
-					},
-					{
-						"internalType": "address",
-						"name": "mintnft",
-						"type": "address"
 					}
 				],
 				"name": "mintNFT",
@@ -787,11 +787,11 @@
 			]
 		},
 		"SportNFT.sol": {
-			"keccak256": "0xea64347d7197499010c3431baef1b3425b6036b1503e5d3e70d62c896737a113",
+			"keccak256": "0x2757877870908594b8710f177159225c19a8a0ce3a98135d7ae7cc6657b91c23",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://91c9c5f59c3824c3bdcf25e0baa3c2e9d3f52dc3a093e6f07bda0e4869bd7e14",
-				"dweb:/ipfs/QmVk1XFm1M2oGt2ZYdJxazmqqBrNsaq5PC4ASdBSMJsryy"
+				"bzz-raw://b0050fc9729e00174fa73f3e7b2f83acafcb87aee46404cfd19f1f92291537f3",
+				"dweb:/ipfs/QmSM94GhwawrYXP9n9xz7f9EH6oQ4A5v1zJEWrPekQgJ1i"
 			]
 		}
 	},

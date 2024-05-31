@@ -14,7 +14,7 @@
 					},
 					{
 						"internalType": "address",
-						"name": "_soccerNft",
+						"name": "_sportNftAddress",
 						"type": "address"
 					},
 					{
@@ -59,7 +59,7 @@
 					{
 						"indexed": true,
 						"internalType": "uint256",
-						"name": "bidId",
+						"name": "listingId",
 						"type": "uint256"
 					},
 					{
@@ -69,9 +69,9 @@
 						"type": "address"
 					},
 					{
-						"indexed": true,
+						"indexed": false,
 						"internalType": "uint256",
-						"name": "highestBid",
+						"name": "amount",
 						"type": "uint256"
 					}
 				],
@@ -90,7 +90,7 @@
 					{
 						"indexed": true,
 						"internalType": "uint256",
-						"name": "tokenId",
+						"name": "listingId",
 						"type": "uint256"
 					},
 					{
@@ -115,7 +115,7 @@
 					{
 						"indexed": true,
 						"internalType": "uint256",
-						"name": "tokenId",
+						"name": "listingId",
 						"type": "uint256"
 					},
 					{
@@ -148,6 +148,11 @@
 								"internalType": "address",
 								"name": "tokenAddress",
 								"type": "address"
+							},
+							{
+								"internalType": "string",
+								"name": "tokenURI",
+								"type": "string"
 							},
 							{
 								"internalType": "uint256",
@@ -201,6 +206,11 @@
 								"type": "address"
 							},
 							{
+								"internalType": "string",
+								"name": "tokenURI",
+								"type": "string"
+							},
+							{
 								"internalType": "uint256",
 								"name": "price",
 								"type": "uint256"
@@ -252,6 +262,11 @@
 								"type": "address"
 							},
 							{
+								"internalType": "string",
+								"name": "tokenURI",
+								"type": "string"
+							},
+							{
 								"internalType": "uint256",
 								"name": "price",
 								"type": "uint256"
@@ -286,6 +301,31 @@
 				"inputs": [
 					{
 						"indexed": true,
+						"internalType": "uint256",
+						"name": "listingId",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "buyer",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "NFTBought",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
 						"internalType": "address",
 						"name": "previousOwner",
 						"type": "address"
@@ -299,60 +339,6 @@
 				],
 				"name": "OwnershipTransferred",
 				"type": "event"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"name": "Createdbids",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "tokenId",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "price",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint88",
-						"name": "deadline",
-						"type": "uint88"
-					},
-					{
-						"internalType": "address",
-						"name": "lister",
-						"type": "address"
-					},
-					{
-						"internalType": "bool",
-						"name": "active",
-						"type": "bool"
-					},
-					{
-						"internalType": "uint256",
-						"name": "highestBid",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "bidBalance",
-						"type": "uint256"
-					},
-					{
-						"internalType": "address",
-						"name": "highestBidder",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
 			},
 			{
 				"inputs": [],
@@ -369,7 +355,7 @@
 			},
 			{
 				"inputs": [],
-				"name": "SoccerNft",
+				"name": "SportNftAddress",
 				"outputs": [
 					{
 						"internalType": "address",
@@ -386,52 +372,45 @@
 						"internalType": "uint256",
 						"name": "",
 						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
 					}
 				],
 				"name": "bids",
 				"outputs": [
 					{
-						"internalType": "uint256",
-						"name": "tokenId",
-						"type": "uint256"
+						"internalType": "address",
+						"name": "bidder",
+						"type": "address"
 					},
 					{
 						"internalType": "uint256",
-						"name": "price",
+						"name": "amount",
 						"type": "uint256"
 					},
 					{
 						"internalType": "uint88",
-						"name": "deadline",
+						"name": "timestamp",
 						"type": "uint88"
-					},
-					{
-						"internalType": "address",
-						"name": "lister",
-						"type": "address"
-					},
-					{
-						"internalType": "bool",
-						"name": "active",
-						"type": "bool"
-					},
-					{
-						"internalType": "uint256",
-						"name": "highestBid",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "bidBalance",
-						"type": "uint256"
-					},
-					{
-						"internalType": "address",
-						"name": "highestBidder",
-						"type": "address"
 					}
 				],
 				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_listingId",
+						"type": "uint256"
+					}
+				],
+				"name": "buyNFT",
+				"outputs": [],
+				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
@@ -463,14 +442,9 @@
 			{
 				"inputs": [
 					{
-						"internalType": "address",
-						"name": "_tokenAddress",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "_tokenId",
-						"type": "uint256"
+						"internalType": "string",
+						"name": "_tokenURI",
+						"type": "string"
 					},
 					{
 						"internalType": "uint256",
@@ -492,7 +466,7 @@
 				"inputs": [
 					{
 						"internalType": "uint256",
-						"name": "bidId",
+						"name": "_listingId",
 						"type": "uint256"
 					}
 				],
@@ -515,225 +489,36 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
-				"name": "getAllBids",
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_listingId",
+						"type": "uint256"
+					}
+				],
+				"name": "getBidHistory",
 				"outputs": [
 					{
 						"components": [
 							{
-								"internalType": "uint256",
-								"name": "tokenId",
-								"type": "uint256"
+								"internalType": "address",
+								"name": "bidder",
+								"type": "address"
 							},
 							{
 								"internalType": "uint256",
-								"name": "price",
+								"name": "amount",
 								"type": "uint256"
 							},
 							{
 								"internalType": "uint88",
-								"name": "deadline",
+								"name": "timestamp",
 								"type": "uint88"
-							},
-							{
-								"internalType": "address",
-								"name": "lister",
-								"type": "address"
-							},
-							{
-								"internalType": "bool",
-								"name": "active",
-								"type": "bool"
-							},
-							{
-								"internalType": "uint256",
-								"name": "highestBid",
-								"type": "uint256"
-							},
-							{
-								"internalType": "uint256",
-								"name": "bidBalance",
-								"type": "uint256"
-							},
-							{
-								"internalType": "address",
-								"name": "highestBidder",
-								"type": "address"
 							}
 						],
 						"internalType": "struct SportVault.Bid[]",
 						"name": "",
 						"type": "tuple[]"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "getAllListings",
-				"outputs": [
-					{
-						"components": [
-							{
-								"internalType": "uint256",
-								"name": "tokenId",
-								"type": "uint256"
-							},
-							{
-								"internalType": "address",
-								"name": "tokenAddress",
-								"type": "address"
-							},
-							{
-								"internalType": "uint256",
-								"name": "price",
-								"type": "uint256"
-							},
-							{
-								"internalType": "uint88",
-								"name": "deadline",
-								"type": "uint88"
-							},
-							{
-								"internalType": "address",
-								"name": "lister",
-								"type": "address"
-							},
-							{
-								"internalType": "bool",
-								"name": "active",
-								"type": "bool"
-							}
-						],
-						"internalType": "struct SportVault.Listing[]",
-						"name": "",
-						"type": "tuple[]"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "getAllNFTs",
-				"outputs": [
-					{
-						"components": [
-							{
-								"internalType": "uint256",
-								"name": "tokenId",
-								"type": "uint256"
-							},
-							{
-								"internalType": "address",
-								"name": "tokenAddress",
-								"type": "address"
-							},
-							{
-								"internalType": "uint256",
-								"name": "price",
-								"type": "uint256"
-							},
-							{
-								"internalType": "uint88",
-								"name": "deadline",
-								"type": "uint88"
-							},
-							{
-								"internalType": "address",
-								"name": "lister",
-								"type": "address"
-							},
-							{
-								"internalType": "bool",
-								"name": "active",
-								"type": "bool"
-							}
-						],
-						"internalType": "struct SportVault.Listing[]",
-						"name": "",
-						"type": "tuple[]"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "bidId",
-						"type": "uint256"
-					}
-				],
-				"name": "getBid",
-				"outputs": [
-					{
-						"components": [
-							{
-								"internalType": "uint256",
-								"name": "tokenId",
-								"type": "uint256"
-							},
-							{
-								"internalType": "uint256",
-								"name": "price",
-								"type": "uint256"
-							},
-							{
-								"internalType": "uint88",
-								"name": "deadline",
-								"type": "uint88"
-							},
-							{
-								"internalType": "address",
-								"name": "lister",
-								"type": "address"
-							},
-							{
-								"internalType": "bool",
-								"name": "active",
-								"type": "bool"
-							},
-							{
-								"internalType": "uint256",
-								"name": "highestBid",
-								"type": "uint256"
-							},
-							{
-								"internalType": "uint256",
-								"name": "bidBalance",
-								"type": "uint256"
-							},
-							{
-								"internalType": "address",
-								"name": "highestBidder",
-								"type": "address"
-							}
-						],
-						"internalType": "struct SportVault.Bid",
-						"name": "",
-						"type": "tuple"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "bidId",
-						"type": "uint256"
-					}
-				],
-				"name": "getHighestBidder",
-				"outputs": [
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
 					}
 				],
 				"stateMutability": "view",
@@ -753,109 +538,19 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
-				"name": "getListingPrice",
-				"outputs": [
+				"inputs": [
 					{
 						"internalType": "uint256",
-						"name": "",
+						"name": "_listingId",
 						"type": "uint256"
 					}
 				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "owner",
-						"type": "address"
-					}
-				],
-				"name": "getListingsByAddress",
+				"name": "getTokenURI",
 				"outputs": [
 					{
-						"components": [
-							{
-								"internalType": "uint256",
-								"name": "tokenId",
-								"type": "uint256"
-							},
-							{
-								"internalType": "address",
-								"name": "tokenAddress",
-								"type": "address"
-							},
-							{
-								"internalType": "uint256",
-								"name": "price",
-								"type": "uint256"
-							},
-							{
-								"internalType": "uint88",
-								"name": "deadline",
-								"type": "uint88"
-							},
-							{
-								"internalType": "address",
-								"name": "lister",
-								"type": "address"
-							},
-							{
-								"internalType": "bool",
-								"name": "active",
-								"type": "bool"
-							}
-						],
-						"internalType": "struct SportVault.Listing[]",
+						"internalType": "string",
 						"name": "",
-						"type": "tuple[]"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "getMyNFTs",
-				"outputs": [
-					{
-						"components": [
-							{
-								"internalType": "uint256",
-								"name": "tokenId",
-								"type": "uint256"
-							},
-							{
-								"internalType": "address",
-								"name": "tokenAddress",
-								"type": "address"
-							},
-							{
-								"internalType": "uint256",
-								"name": "price",
-								"type": "uint256"
-							},
-							{
-								"internalType": "uint88",
-								"name": "deadline",
-								"type": "uint88"
-							},
-							{
-								"internalType": "address",
-								"name": "lister",
-								"type": "address"
-							},
-							{
-								"internalType": "bool",
-								"name": "active",
-								"type": "bool"
-							}
-						],
-						"internalType": "struct SportVault.Listing[]",
-						"name": "",
-						"type": "tuple[]"
+						"type": "string"
 					}
 				],
 				"stateMutability": "view",
@@ -921,6 +616,11 @@
 						"type": "address"
 					},
 					{
+						"internalType": "string",
+						"name": "tokenURI",
+						"type": "string"
+					},
+					{
 						"internalType": "uint256",
 						"name": "price",
 						"type": "uint256"
@@ -961,12 +661,12 @@
 				"inputs": [
 					{
 						"internalType": "uint256",
-						"name": "tokenId",
+						"name": "_listingId",
 						"type": "uint256"
 					},
 					{
 						"internalType": "uint256",
-						"name": "price",
+						"name": "_amount",
 						"type": "uint256"
 					}
 				],
@@ -1004,37 +704,6 @@
 					}
 				],
 				"name": "transferOwnership",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "_listPrice",
-						"type": "uint256"
-					}
-				],
-				"name": "updateListPrice",
-				"outputs": [],
-				"stateMutability": "payable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "bidId",
-						"type": "uint256"
-					}
-				],
-				"name": "withdrawFunds",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -1080,7 +749,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"SoccerVault.sol": "SportVault"
+			"SportVault.sol": "SportVault"
 		},
 		"evmVersion": "cancun",
 		"libraries": {},
@@ -1108,6 +777,30 @@
 			"urls": [
 				"bzz-raw://8ed324d3920bb545059d66ab97d43e43ee85fd3bd52e03e401f020afb0b120f6",
 				"dweb:/ipfs/QmfEckWLmZkDDcoWrkEvMWhms66xwTLff9DDhegYpvHo1a"
+			]
+		},
+		"@openzeppelin/contracts/interfaces/IERC165.sol": {
+			"keccak256": "0xde7e9fd9aee8d4f40772f96bb3b58836cbc6dfc0227014a061947f8821ea9724",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://11fea9f8bc98949ac6709f0c1699db7430d2948137aa94d5a9e95a91f61a710a",
+				"dweb:/ipfs/QmQdfRXxQjwP6yn3DVo1GHPpriKNcFghSPi94Z1oKEFUNS"
+			]
+		},
+		"@openzeppelin/contracts/interfaces/IERC4906.sol": {
+			"keccak256": "0xb31b86c03f4677dcffa4655285d62433509513be9bafa0e04984565052d34e44",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://a89c6fb0cd5fef4244500b633f63def9f2bb2134debb961e590bd5a2910662fd",
+				"dweb:/ipfs/QmNqWyCxyopvb99RbRomPpfTZGXRi5MnzgpFXE2BFLLgMc"
+			]
+		},
+		"@openzeppelin/contracts/interfaces/IERC721.sol": {
+			"keccak256": "0xc4d7ebf63eb2f6bf3fee1b6c0ee775efa9f31b4843a5511d07eea147e212932d",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://01c66a2fad66bc710db7510419a7eee569b40b67cd9f01b70a3fc90d6f76c03b",
+				"dweb:/ipfs/QmT1CjJZq4eTNA4nu8E9ZrWfaZu6ReUsDbjcK8DbEFqwx5"
 			]
 		},
 		"@openzeppelin/contracts/interfaces/draft-IERC6093.sol": {
@@ -1142,12 +835,44 @@
 				"dweb:/ipfs/QmcrhfPgVNf5mkdhQvy1pMv51TFokD3Y4Wa5WZhFqVh8UV"
 			]
 		},
+		"@openzeppelin/contracts/token/ERC721/ERC721.sol": {
+			"keccak256": "0x13dd061770956c8489b80cfc89d9cdfc8ea2783d953691ea037a380731d52784",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://ed37f0f86e7fe31659e48c3a2a5920a92dd7f13c85cf8991fb79fe5f01e08efd",
+				"dweb:/ipfs/QmUtm9bQGvjr9hHGwkPWrbgFmVqzaJcxjkaYDex2oGsonS"
+			]
+		},
 		"@openzeppelin/contracts/token/ERC721/IERC721.sol": {
 			"keccak256": "0x5ef46daa3b58ef2702279d514780316efaa952915ee1aa3396f041ee2982b0b4",
 			"license": "MIT",
 			"urls": [
 				"bzz-raw://2f8f2a76e23b02fc69e8cd24c3cb47da6c7af3a2d6c3a382f8ac25c6e094ade7",
 				"dweb:/ipfs/QmPV4ZS4tPVv4mTCf9ejyZ1ai57EEibDRj7mN2ARDCLV5n"
+			]
+		},
+		"@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol": {
+			"keccak256": "0x7f7a26306c79a65fb8b3b6c757cd74660c532cd8a02e165488e30027dd34ca49",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://d01e0b2b837ee2f628545e54d8715b49c7ef2befd08356c2e7f6c50dde8a1c22",
+				"dweb:/ipfs/QmWBAn6y2D1xgftci97Z3qR9tQnkvwQpYwFwkTvDMvqU4i"
+			]
+		},
+		"@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol": {
+			"keccak256": "0xcc6f49e0c57072d6a18eef0d5fc22a4cc20462c18f0c365d2dd9a2c732fde670",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://24915e61c7896c336b60788408cd5792b97b782e98e392920a2c55eb1803fe96",
+				"dweb:/ipfs/QmVHhcmFnMYZBCjnVUk6f5quMCDsBR2j669a1nuMiGWY9Z"
+			]
+		},
+		"@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol": {
+			"keccak256": "0x37d1aaaa5a2908a09e9dcf56a26ddf762ecf295afb5964695937344fc6802ce1",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://ed0bfc1b92153c5000e50f4021367b931bbe96372ac6facec3c4961b72053d02",
+				"dweb:/ipfs/Qmbwp8VDerjS5SV1quwHH1oMXxPQ93fzfLVqJ2RCqbowGE"
 			]
 		},
 		"@openzeppelin/contracts/utils/Context.sol": {
@@ -1174,6 +899,14 @@
 				"dweb:/ipfs/QmZEeeXoFPW47amyP35gfzomF9DixqqTEPwzBakv6cZw6i"
 			]
 		},
+		"@openzeppelin/contracts/utils/introspection/ERC165.sol": {
+			"keccak256": "0x9e8778b14317ba9e256c30a76fd6c32b960af621987f56069e1e819c77c6a133",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://1777404f1dcd0fac188e55a288724ec3c67b45288e49cc64723e95e702b49ab8",
+				"dweb:/ipfs/QmZFdC626GButBApwDUvvTnUzdinevC3B24d7yyh57XkiA"
+			]
+		},
 		"@openzeppelin/contracts/utils/introspection/IERC165.sol": {
 			"keccak256": "0x4296879f55019b23e135000eb36896057e7101fb7fb859c5ef690cf14643757b",
 			"license": "MIT",
@@ -1198,12 +931,20 @@
 				"dweb:/ipfs/QmVBEei6aTnvYNZp2CHYVNKyZS4q1KkjANfY39WVXZXVoT"
 			]
 		},
-		"SoccerVault.sol": {
-			"keccak256": "0x9067102e06fa4ba91901611a5edb8fdf517c1feaccf8b44245c4668333f464eb",
+		"SportNFT.sol": {
+			"keccak256": "0x2757877870908594b8710f177159225c19a8a0ce3a98135d7ae7cc6657b91c23",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://b5ad3a72ebd25b2055d7647cd181cf0b9afed3b16f1f5aab1f0b68a85a77aebd",
-				"dweb:/ipfs/QmPqaooFsayrGptRCJR6KpdhVAJEpYNyoDEoy2wQ8DqFAg"
+				"bzz-raw://b0050fc9729e00174fa73f3e7b2f83acafcb87aee46404cfd19f1f92291537f3",
+				"dweb:/ipfs/QmSM94GhwawrYXP9n9xz7f9EH6oQ4A5v1zJEWrPekQgJ1i"
+			]
+		},
+		"SportVault.sol": {
+			"keccak256": "0xfd117103f2b8b737e43cc0ee8a3472b493da68cc4474a2667cd30b4cb4c1c7c2",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://5db589adc9206b479997ae25e550c9a08b86efaf175516b4918ac1b738bdf11b",
+				"dweb:/ipfs/QmTWVZsywWouUCnEjJT61QBz2oD38o8pHhrA9rGrWnaBv1"
 			]
 		}
 	},
